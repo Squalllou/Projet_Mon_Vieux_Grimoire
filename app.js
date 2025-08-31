@@ -6,7 +6,7 @@ const booksRoutes = require('./routes/books');
 const userRoutes = require('./routes/user');
 const path = require('path');
 
-//tout mettre en variable d'environnement
+
 mongoose.connect(process.env.MONGODB_URI) // lien de connexion a mongodb atlas
   .then(() => console.log('Connexion à MongoDB réussie !'))
   .catch(() => console.log('Connexion à MongoDB échouée !'));

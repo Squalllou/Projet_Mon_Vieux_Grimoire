@@ -4,7 +4,7 @@ const fs = require('fs');
 // CREER LES LIVRES
 exports.createBook = (req, res, next) => {
    const bookObject = JSON.parse(req.body.book);                                   //recuperation de le livre
-   delete bookObject._id;                                                          //suppression de son id car geré par la bd
+   delete bookObject._id;                                                          //suppression de son id car geré par la bdd
    delete bookObject._userId;                                                      //suppression de l'id du client pour eviter que le client tente de se faire passer pour qqun d'autre
    const book = new Book({
        ...bookObject,                                                               //on creer le livre avec les donnees recuperees
@@ -96,7 +96,6 @@ exports.addRating = (req, res, next) => {
   const bookId = req.params.id;
   const { rating } = req.body;
   const userId = req.auth.userId;
-
 
   // On vérifie que la note est entre 0 et 5
   if (rating < 0 || rating > 5) {
