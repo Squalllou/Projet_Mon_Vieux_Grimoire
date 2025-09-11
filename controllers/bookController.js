@@ -9,12 +9,12 @@ exports.createBook = (req, res, next) => {
    const book = new Book({
        ...bookObject,                                                               //on creer le livre avec les donnees recuperees
        userId: req.auth.userId,                                                     //on lui attribu l'id du token d'authentification
-       imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}` //on créer l'url de l'image en prenant le protocole(http)+le nom d'hotte+l'endroit ou on le met + le nom creer par multer
+       imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}` //on créer l'url de l'image en prenant le protocole(http)+le nom d'hote+l'endroit ou on le met + le nom creer par multer
    });
  
    book.save()                                                                      //on enregistre notre livre
    .then(() => { res.status(201).json({message: 'Livre enregistré !'})})
-   .catch(error => { res.status(400).json( { error })})
+   .catch(error => { res.status(400).json( error.message)})
 };
 
 // TROUVE UN LIVRE
@@ -49,10 +49,10 @@ exports.modifyBook = (req, res, next) => {
            } else {
                Book.updateOne({ _id: req.params.id}, { ...bookObject, _id: req.params.id})
                .then(() => res.status(200).json({message : 'Livre modifié!'}))
-               .catch(error => res.status(401).json({ error }));
+               .catch(error => res.status(401).json(error.message));
            }
        })
-       .catch((error) => {res.status(400).json({ error }); 
+       .catch((error) => {res.status(400).json(error.message); 
       });
 };
 
@@ -60,19 +60,19 @@ exports.modifyBook = (req, res, next) => {
 exports.deleteBook = (req, res, next) => {
    Book.findOne({ _id: req.params.id})
        .then(book => {
-           if (book.userId != req.auth.userId) {
+           if (book.userId !== req.auth.userId) {   //toujours strictement
                res.status(403).json({ message: 'Unauthorized request' });
            } else {
                const filename = book.imageUrl.split('/images/')[1];
                fs.unlink(`images/${filename}`, () => {
                    Book.deleteOne({_id: req.params.id})
                        .then(() => { res.status(200).json({message: 'Livre supprimé !'})})
-                       .catch(error => res.status(401).json({ error }));
+                       .catch(error => res.status(401).json(error.message));
                });
            }
        })
        .catch( error => {
-           res.status(500).json({ error });
+           res.status(500).json( error.message ); //permet de pas tout renvoyé
        });
 };
 
@@ -124,9 +124,9 @@ exports.addRating = (req, res, next) => {
       // Sauvegarde
       book.save()
         .then(updatedBook => res.status(200).json(updatedBook))
-        .catch(error => res.status(500).json({ error }));
+        .catch(error => res.status(500).json(error.message));
     })
-    .catch(error => res.status(500).json({ error }));
+    .catch(error => res.status(500).json(error.message));
 };
 
 // RECUPERER LES 3 MEILLEURS LIVRES
@@ -135,5 +135,5 @@ exports.getBestRatedBooks = (req, res, next) => {
     .sort({ averageRating: -1 }) // Tri décroissant sur la moyenne
     .limit(3)                    // On prend seulement les 3 premiers
     .then(books => res.status(200).json(books))
-    .catch(error => res.status(500).json({ error }));
+    .catch(error => res.status(500).json(error.message));
 };
